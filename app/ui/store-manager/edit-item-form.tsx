@@ -1,7 +1,11 @@
 "use client";
 
 import { useFormState, useFormStatus } from "react-dom";
-import { createShopItem, ShopItemState } from "@/app/lib/shop-actions";
+import {
+  createShopItem,
+  ShopItemState,
+  updateShopItem,
+} from "@/app/lib/shop-actions";
 import { IShopItem } from "@/app/models/shop-item";
 import { useState } from "react";
 import Image from "next/image";
@@ -12,8 +16,9 @@ export default function EditItemForm({ item }: { item: IShopItem }) {
   const [file, setFile] = useState<File | undefined>(undefined);
 
   const initialState = { message: null, errors: {} };
+  const editShopItemWithItem = updateShopItem.bind(null, item);
   const [state, dispatch] = useFormState<ShopItemState, FormData>(
-    createShopItem,
+    editShopItemWithItem,
     initialState
   );
 
@@ -29,11 +34,12 @@ export default function EditItemForm({ item }: { item: IShopItem }) {
         } else {
           formData.append("imageEdited", "false");
         }
+        dispatch(formData);
       }}
-      className="relative h-full"
+      className="relative h-full pb-10"
     >
       <div className="flex items-center justify-between">
-        <h1>Create Item</h1>
+        <h1>Edit Item</h1>
         <div className="flex items-center justify-center">
           <button
             disabled={formStatus.pending}
@@ -62,8 +68,10 @@ export default function EditItemForm({ item }: { item: IShopItem }) {
               <Image
                 src={file ? URL.createObjectURL(file) : item.imageURL}
                 alt="Picked image"
-                layout="fill"
-                objectFit="contain"
+                fill
+                style={{ objectFit: "contain" }}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority
               />
             </div>
           </label>
@@ -110,8 +118,7 @@ export default function EditItemForm({ item }: { item: IShopItem }) {
               ))}
           </div>
         </div>
-
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full pb-10">
           <label>Description</label>
           <textarea
             name="description"

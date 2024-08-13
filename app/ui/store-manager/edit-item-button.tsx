@@ -12,7 +12,7 @@ export default function EditItemButton({ id }: { id: string }) {
       }}
       className="btn btn-circle bg-white"
     >
-      <MdEdit className="text-black" />
+      <MdEdit className="text-black h-6 w-6" />
     </button>
   );
 }

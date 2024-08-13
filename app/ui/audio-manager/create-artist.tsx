@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { IoMdAdd } from "react-icons/io";
 
-export default function CreateItemButton() {
+export default function CreateArtistButton() {
   const router = useRouter();
   return (
     <button
       onClick={() => {
-        router.push("/dashboard/store-manager/create-item");
+        router.push("/dashboard/audio-manager/create-artist");
       }}
       className="btn btn-circle bg-white"
     >
