@@ -2,14 +2,14 @@ import ShopItem, { IShopItem } from "@/app/models/shop-item";
 import CreateItemButton from "@/app/ui/store-manager/create-item-button";
 import ShopItemCard from "@/app/ui/store-manager/shop-item-card";
 import connectMongo from "@/utils/connect-mongo";
-import convertToPlainObject from "@/utils/convert-to-plain-object";
+import { convertDocumentsToShopItems } from "@/utils/convert-to-plain-object";
 
 export default async function Page() {
   await connectMongo();
-  const doc = await ShopItem.find();
-  const shopItems: IShopItem[] = convertToPlainObject(doc);
+  const docs = await ShopItem.find();
+  const shopItems: IShopItem[] = convertDocumentsToShopItems(docs);
 
-  console.log(shopItems)
+  console.log(shopItems);
 
   return (
     <div className="">
@@ -17,7 +17,10 @@ export default async function Page() {
       <div className="flex justify-between">
         <div className="flex items-center w-full space-x-5">
           <label>Filter By</label>
-          <select defaultValue="placeholder" className="select w-full max-w-xs text-black">
+          <select
+            defaultValue="placeholder"
+            className="select w-full max-w-xs text-black"
+          >
             <option value="placeholder" disabled>
               Choose filter
             </option>
@@ -29,7 +32,9 @@ export default async function Page() {
       </div>
       <div className="border-t border-white my-4"></div>
       <div className="grid grid-cols-4 w-full border">
-        {shopItems.map(shopItem => <ShopItemCard key={shopItem._id.toString()} shopItem={shopItem} />)}
+        {shopItems.map((shopItem) => (
+          <ShopItemCard key={shopItem._id.toString()} shopItem={shopItem} />
+        ))}
       </div>
     </div>
   );

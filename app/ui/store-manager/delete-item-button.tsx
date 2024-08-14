@@ -2,10 +2,10 @@ import { deleteShopItem } from "@/app/lib/shop-actions";
 import { MdDelete } from "react-icons/md";
 
 export function DeleteItemButton({ id, publicId }: { id: string; publicId: string }) {
-  const deleteProductWithId = deleteShopItem.bind(null, id, publicId);
+  const deleteShopItemWithId = deleteShopItem.bind(null, id, publicId);
 
   return (
-    <form action={deleteProductWithId}>
+    <form action={deleteShopItemWithId}>
       <button
         type="submit"
         className="btn btn-circle bg-white"

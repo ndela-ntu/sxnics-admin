@@ -64,6 +64,14 @@ export default function CreateItemForm() {
             </>
           )}
         </label>
+        <div id="name-error" aria-live="polite" aria-atomic="true">
+          {state.errors?.image &&
+            state.errors.image.map((error: string, i) => (
+              <p key={i} className="text-sm text-red-500">
+                {error}
+              </p>
+            ))}
+        </div>
         <div className="flex flex-col w-full">
           <label>Name</label>
           <input
