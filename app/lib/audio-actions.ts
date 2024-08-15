@@ -2,7 +2,7 @@
 
 import connectMongo from "@/utils/connect-mongo";
 import { z } from "zod";
-import Track from "../models/track";
+import Track, { ITrack } from "../models/track";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import uploadImage from "@/utils/upload-image";
@@ -111,4 +111,91 @@ export async function deleteTrack(id: string, path: string, publicId?: string) {
   }
 
   revalidatePath("/dashboard/audio-manager");
+}
+
+const UpdateTrackSchema = TrackSchema.omit({
+  id: true,
+  image: true,
+  audio: true,
+});
+
+export async function updateTrack(
+  track: ITrack,
+  prevState: TrackState,
+  formData: FormData
+) {
+  const validatedFields = UpdateTrackSchema.safeParse({
+    artistName: formData.get("artistName"),
+    trackName: formData.get("trackName"),
+  });
+
+  const trackStarts = formData.get("trackStarts");
+  const trackEnds = formData.get("trackEnds");
+  const image = formData.get("image");
+  const audio = formData.get("audio");
+
+  if (!validatedFields.success) {
+    console.error(
+      "Validation failed:",
+      validatedFields.error.flatten().fieldErrors
+    );
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missed fields, failed to create product.",
+    };
+  }
+
+  try {
+    const { artistName, trackName } = validatedFields.data;
+
+    let uploadResult: { url: string; publicId: string } | null = null;
+    if (image instanceof File && image.size > 0) {
+      console.log('Deleting image');
+      await deleteImage(track.imagePublicId ?? '');
+      console.log("Uploading image...");
+      uploadResult = await uploadImage(image);
+      console.log("Image uploaded:", uploadResult);
+    }
+
+    let filePath: string | null = null;
+    if (audio instanceof File && audio.size > 0) {
+      console.log("Deleting track");
+      await deleteAudio(track.filePath);
+      console.log("Uploading audio...");
+      filePath = await uploadAudio(audio, artistName, trackName);
+      console.log("Audio uploaded:", filePath);
+    }
+
+    console.log("Connecting to MongoDB...");
+    await connectMongo();
+    console.log("Connected to MongoDB. Creating track...");
+
+    const resultTrack = await Track.findOneAndUpdate(
+      { _id: track._id },
+      {
+        $set: {
+          artistName,
+          trackName,
+          filePath: filePath ? filePath : track.filePath,
+          imageURL: uploadResult ? uploadResult.url : track.imageURL,
+          imagePublicId: uploadResult ? uploadResult.publicId : track.imagePublicId,
+          trackStarts: trackStarts ? trackStarts : null,
+          trackEnds: trackEnds ? trackEnds : null,
+        },
+      },
+      { new: true }
+    );
+    console.log("Update result:", resultTrack);
+
+    console.log("Track created successfully.");
+  } catch (error) {
+    console.error("Error creating track:", error);
+    return {
+      message: "Error from server: " + error,
+    };
+  }
+
+  console.log("Revalidating path and redirecting...");
+  revalidatePath("/dashboard/audio-manager");
+  redirect("/dashboard/audio-manager");
 }

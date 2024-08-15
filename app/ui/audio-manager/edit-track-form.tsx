@@ -1,30 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
 import { FaImage } from "react-icons/fa";
-import { createTrack, TrackState } from "@/app/lib/audio-actions";
+import { createTrack, TrackState, updateTrack } from "@/app/lib/audio-actions";
 import { formatDateTime, formatDateTimeLocale } from "@/utils/format-date";
 import { TrackDifference } from "@/utils/get-sorted-trackslots";
+import { ITrack } from "@/app/models/track";
 
-export default function CreateTrackForm({
+export default function EditTrackForm({
   sortedTrackSlots,
+  track,
 }: {
+  track: ITrack;
   sortedTrackSlots: TrackDifference[];
 }) {
   const formStatus = useFormStatus();
 
   const [image, setImage] = useState<File | undefined>(undefined);
-  const [fromDateTime, setFromDateTime] = useState<Date | null>(null);
-  const [toDateTime, setToDateTime] = useState<Date | null>(null);
+  const [audio, setAudio] = useState<File | undefined>(undefined);
+  const [fromDateTime, setFromDateTime] = useState<Date | null>(
+    track.trackStarts ? new Date(Number(track.trackStarts)) : null
+  );
+  const [toDateTime, setToDateTime] = useState<Date | null>(
+    track.trackEnds ? new Date(Number(track.trackEnds)) : null
+  );
   const [duration, setDuration] = useState<number | null>(null);
 
   const initialState = { message: null, errors: {} };
+  const editTrackWithTrack = updateTrack.bind(null, track);
   const [state, dispatch] = useFormState<TrackState, FormData>(
-    createTrack,
+    editTrackWithTrack,
     initialState
   );
+
+  let trackImageUrl: string;
+  if (track.imageURL) {
+    trackImageUrl = track.imageURL;
+  } else {
+    trackImageUrl = "/user.png";
+  }
 
   if (formStatus.pending) {
     return <div>Loading...</div>;
@@ -38,6 +54,17 @@ export default function CreateTrackForm({
           formData.append("trackEnds", toDateTime.getTime().toString());
           formData.delete("dateTimePicker");
         }
+        if (image) {
+          formData.append("imageEdited", "true");
+        } else {
+          formData.append("imageEdited", "false");
+        }
+        if (audio) {
+          formData.append("audioEdited", "true");
+        } else {
+          formData.append("audioEdited", "false");
+        }
+
         dispatch(formData);
       }}
       className="relative h-full m-5"
@@ -70,28 +97,23 @@ export default function CreateTrackForm({
             }}
             accept="image/*"
           />
-          {image ? (
-            <div className="relative w-full h-full flex items-center justify-center">
-              <Image
-                src={URL.createObjectURL(image)}
-                alt="Picked image"
-                fill
-                style={{ objectFit: "contain" }}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority
-              />
-            </div>
-          ) : (
-            <>
-              <FaImage className="w-10 h-10" />
-            </>
-          )}
+          <div className="relative w-full h-full flex items-center justify-center">
+            <Image
+              src={image ? URL.createObjectURL(image) : trackImageUrl}
+              alt="Picked image"
+              fill
+              style={{ objectFit: "contain" }}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority
+            />
+          </div>
         </label>
 
         <div className="flex flex-col w-full">
           <label>Artist Name</label>
           <input
             type="text"
+            defaultValue={track.artistName}
             name="artistName"
             placeholder="Artist Name"
             className="input bg-transparent border border-white w-full max-w-xs"
@@ -107,6 +129,7 @@ export default function CreateTrackForm({
         </div>
         <div className="flex items-start">
           <div>
+            <p className="pb-2.5">Selected Filepath: {track.filePath}</p>
             <label className="block">
               <span className="sr-only">Upload Audio File</span>
               <input
@@ -117,16 +140,17 @@ export default function CreateTrackForm({
                   const files = e.target.files;
 
                   if (files) {
+                    setAudio(files[0]);
                     const audio = new Audio(URL.createObjectURL(files[0]));
-                    let duration: number = 0;
+                    let initDuration: number = 0;
                     audio.addEventListener("loadedmetadata", () => {
-                      duration = audio.duration;
-                      setDuration(duration);
+                      initDuration = audio.duration;
+                      setDuration(initDuration);
                     });
 
                     if (fromDateTime) {
                       const toDate = new Date(
-                        fromDateTime.getTime() + duration * 1000
+                        fromDateTime.getTime() + duration! * 1000
                       );
                       setToDateTime(toDate);
                     }
@@ -150,6 +174,7 @@ export default function CreateTrackForm({
           <label>Track Name</label>
           <input
             type="text"
+            defaultValue={track.trackName}
             name="trackName"
             placeholder="Track Name"
             className="input bg-transparent border border-white w-full max-w-xs"
@@ -193,8 +218,8 @@ export default function CreateTrackForm({
           <label>Suggested Track Timeslot</label>
           <select
             disabled={duration == null}
-            defaultValue={""}
             className="select p-2.5 rounded-lg w-min text-black"
+            defaultValue={""}
             onChange={(e) => {
               console.log("Event:", e);
               const date = e.target.value;
@@ -203,9 +228,7 @@ export default function CreateTrackForm({
               setToDateTime(new Date(Number(date) + duration! * 1000));
             }}
           >
-            <option value="">
-              Pick suggested timeslot
-            </option>
+            <option value="">Pick suggested timeslot</option>
             {sortedTrackSlots.map((trackSlot, i) => {
               if (trackSlot.difference / 1000 > duration!) {
                 return (

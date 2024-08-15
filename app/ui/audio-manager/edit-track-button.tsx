@@ -8,7 +8,7 @@ export default function EditTrackButton({ id }: { id: string }) {
   return (
     <button
       onClick={() => {
-        router.push(`/dashboard/store-manager/edit-track/${id}`);
+        router.push(`/dashboard/audio-manager/edit-track/${id}`);
       }}
       className="btn btn-circle bg-white"
     >

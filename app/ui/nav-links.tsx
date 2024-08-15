@@ -16,7 +16,7 @@ const links = [
     icon: <FaHome className="" />,
   },
   {
-    name: "Artist/Audio Manager",
+    name: "Audio Manager",
     href: "/dashboard/audio-manager",
     icon: <MdAudiotrack />,
   },
