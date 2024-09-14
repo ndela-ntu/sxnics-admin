@@ -7,6 +7,7 @@ export interface IShopItem {
   price: number;
   imageURL: string;
   imagePublicId: string;
+  quantity: number;
 }
 
 const ShopItemSchema = new Schema({
@@ -15,6 +16,7 @@ const ShopItemSchema = new Schema({
   description: { type: String, required: true },
   imageURL: { type: String, required: true },
   imagePublicId: { type: String, required: true },
+  quantity: { type: Number, required: true }
 });
 
 const ShopItem =

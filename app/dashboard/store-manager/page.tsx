@@ -1,8 +1,8 @@
 import ShopItem, { IShopItem } from "@/app/models/shop-item";
 import CreateItemButton from "@/app/ui/store-manager/create-item-button";
 import ShopItemCard from "@/app/ui/store-manager/shop-item-card";
-import connectMongo from "@/utils/connect-mongo";
-import { convertDocumentsToShopItems } from "@/utils/convert-to-plain-object";
+import connectMongo from "@/app/utils/connect-mongo";
+import { convertDocumentsToShopItems } from "@/app/utils/convert-to-plain-object";
 
 export default async function Page() {
   await connectMongo();

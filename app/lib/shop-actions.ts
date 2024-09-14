@@ -19,6 +19,7 @@ const ShopItemSchema = z.object({
     .refine((file: File) => {
       return !file || file.size <= 1024 * 1024 * 5;
     }, "File size must be less than 5MB"),
+    quantity: z.coerce.number().gt(-1, { message: "Quantity should be greater than -1"})
 });
 
 export type ShopItemState = {
@@ -27,6 +28,7 @@ export type ShopItemState = {
     description?: string[];
     price?: string[];
     image?: string[];
+    quantity?: string[]
   };
   message?: string | null;
 };
@@ -42,6 +44,7 @@ export async function createShopItem(
     description: formData.get("description"),
     price: formData.get("price"),
     image: formData.get("image"),
+    quantity: formData.get("quantity")
   });
 
   if (!validatedFields.success) {
@@ -52,7 +55,7 @@ export async function createShopItem(
   }
 
   try {
-    const { name, price, description, image } = validatedFields.data;
+    const { name, price, description, image, quantity } = validatedFields.data;
 
     const uploadResult = await uploadImage(image);
 
@@ -66,6 +69,7 @@ export async function createShopItem(
         description,
         imageURL: url,
         imagePublicId: publicId,
+        quantity: quantity
       });
     }
   } catch (error) {
@@ -89,6 +93,7 @@ export async function updateShopItem(
     name: formData.get("name"),
     description: formData.get("description"),
     price: formData.get("price"),
+    quantity: formData.get("quantity"),
   });
 
   if (!validatedFields.success) {
@@ -103,7 +108,7 @@ export async function updateShopItem(
   }
 
   try {
-    const { name, price, description } = validatedFields.data;
+    const { name, price, description, quantity } = validatedFields.data;
 
     const imageEdited = formData.get("imageEdited") === "true";
     console.log("Image edited:", imageEdited);
@@ -133,6 +138,7 @@ export async function updateShopItem(
                 price,
                 imagePublicId: publicId,
                 imageURL: url,
+                quantity
               },
             },
             { new: true }
@@ -154,6 +160,7 @@ export async function updateShopItem(
             price,
             imagePublicId: item.imagePublicId,
             imageURL: item.imageURL,
+            quantity
           },
         },
         { new: true }

@@ -112,6 +112,25 @@ export default function EditItemForm({ item }: { item: IShopItem }) {
               ))}
           </div>
         </div>
+
+        <div className="flex flex-col w-full">
+          <label>Quantity</label>
+          <input
+            type="number"
+            defaultValue={item.quantity}
+            name="quantity"
+            placeholder="Quantity"
+            className="input bg-transparent border border-white w-full max-w-xs"
+          />
+          <div id="price-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.quantity &&
+              state.errors.quantity.map((error: string, i) => (
+                <p key={i} className="text-sm text-red-500">
+                  {error}
+                </p>
+              ))}
+          </div>
+        </div>
         <div className="flex flex-col w-full pb-10">
           <label>Description</label>
           <textarea
