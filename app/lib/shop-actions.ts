@@ -1,12 +1,12 @@
 "use server";
 
-import connectMongo from "@/utils/connect-mongo";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import ShopItem, { IShopItem } from "../models/shop-item";
-import uploadImage from "@/utils/upload-image";
-import deleteImage from "@/utils/delete-image";
+import uploadImage from "../utils/upload-image";
+import connectMongo from "../utils/connect-mongo";
+import deleteImage from "../utils/delete-image";
 
 const ShopItemSchema = z.object({
   id: z.string(),
@@ -123,7 +123,7 @@ export async function updateShopItem(
           const { url, publicId } = result;
 
           console.log("Updating shop item with new image...");
-          console.log(item._id)
+          console.log(item._id);
           const resultItem = await ShopItem.findOneAndUpdate(
             { _id: item._id },
             {
@@ -171,6 +171,7 @@ export async function updateShopItem(
 }
 
 export async function deleteShopItem(id: string, publicId: string) {
+  await connectMongo();
   await ShopItem.findByIdAndDelete(id);
   await deleteImage(publicId);
 

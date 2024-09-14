@@ -1,9 +1,7 @@
-"use server";
-
 export default async function uploadImage(
-  image: File
+  image: File | Blob
 ): Promise<{ publicId: string; url: string } | null> {
-  console.log(process.env.CLOUDINARY_API_KEY || null);
+  
   
   const formData = new FormData();
   formData.append("file", image);

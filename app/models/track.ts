@@ -9,6 +9,7 @@ export interface ITrack {
   imagePublicId?: string;
   trackStarts?: string;
   trackEnds?: string;
+  duration: number;
 }
 
 const TrackSchema = new Schema({
@@ -19,6 +20,7 @@ const TrackSchema = new Schema({
   imagePublicId: { type: String, required: false},
   trackStarts: { type: String, required: false },
   trackEnds: { type: String, required: false },
+  duration: { type: Number, required: true },
 });
 
 const Track =

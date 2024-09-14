@@ -75,12 +75,6 @@ export default function EditItemForm({ item }: { item: IShopItem }) {
               />
             </div>
           </label>
-          {state.errors?.image &&
-            state.errors.image.map((error: string, i) => (
-              <p key={i} className="text-sm text-red-500">
-                {error}
-              </p>
-            ))}
         </div>
         <div className="flex flex-col w-full">
           <label>Name</label>

@@ -1,8 +1,8 @@
 import Track, { ITrack } from "@/app/models/track";
-import CreateTrackButton from "@/app/ui/audio-manager/create-track";
+import CreateTrackButton from "@/app/ui/audio-manager/create-track-button";
 import TrackCard from "@/app/ui/audio-manager/track-card";
-import connectMongo from "@/utils/connect-mongo";
-import { convertDocumentsToTracks } from "@/utils/convert-to-plain-object";
+import connectMongo from "@/app/utils/connect-mongo";
+import { convertDocumentsToTracks } from "@/app/utils/convert-to-plain-object";
 
 export default async function Page() {
   await connectMongo();
@@ -14,7 +14,6 @@ export default async function Page() {
       <h1 className="mb-5">Store Manager</h1>
       <div className="flex justify-between">
         <div className="flex items-center w-full space-x-5">
-          <label>Filter By</label>
           <input type="search" placeholder="Search for artist..." className="p-2.5 rounded-lg placeholder:text-black" />
         </div>
         <CreateTrackButton />

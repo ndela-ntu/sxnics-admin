@@ -3,7 +3,7 @@ import Image from "next/image";
 import EditTrackButton from "./edit-track-button";
 import { DeleteTrackButton } from "./delete-track-button";
 import { RxAvatar } from "react-icons/rx";
-import { formatDateTime } from "@/utils/format-date";
+import { formatDateTime } from "@/app/utils/format-date";
 
 export default function TrackCard({ track }: { track: ITrack }) {
   return (

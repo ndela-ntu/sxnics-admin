@@ -5,9 +5,9 @@ import { useFormState, useFormStatus } from "react-dom";
 import Image from "next/image";
 import { FaImage } from "react-icons/fa";
 import { createTrack, TrackState, updateTrack } from "@/app/lib/audio-actions";
-import { formatDateTime, formatDateTimeLocale } from "@/utils/format-date";
-import { TrackDifference } from "@/utils/get-sorted-trackslots";
 import { ITrack } from "@/app/models/track";
+import { TrackDifference } from "@/app/utils/get-sorted-trackslots";
+import { formatDateTime, formatDateTimeLocale } from "@/app/utils/format-date";
 
 export default function EditTrackForm({
   sortedTrackSlots,
@@ -26,7 +26,7 @@ export default function EditTrackForm({
   const [toDateTime, setToDateTime] = useState<Date | null>(
     track.trackEnds ? new Date(Number(track.trackEnds)) : null
   );
-  const [duration, setDuration] = useState<number | null>(null);
+  const [duration, setDuration] = useState<number | null>(track.duration);
 
   const initialState = { message: null, errors: {} };
   const editTrackWithTrack = updateTrack.bind(null, track);
@@ -54,6 +54,11 @@ export default function EditTrackForm({
           formData.append("trackEnds", toDateTime.getTime().toString());
           formData.delete("dateTimePicker");
         }
+
+        if (duration) {
+          formData.append("duration", duration.toString());
+        }
+
         if (image) {
           formData.append("imageEdited", "true");
         } else {
@@ -148,7 +153,7 @@ export default function EditTrackForm({
                       setDuration(initDuration);
                     });
 
-                    if (fromDateTime) {
+                    if (fromDateTime && duration) {
                       const toDate = new Date(
                         fromDateTime.getTime() + duration! * 1000
                       );
@@ -203,7 +208,7 @@ export default function EditTrackForm({
               const selectedDate = new Date(selectedDateTime);
 
               if (selectedDate > now) {
-                const fromDate = new Date(e.target.value);
+                const fromDate = selectedDate;
                 setFromDateTime(fromDate);
                 if (duration) {
                   const toDate = new Date(fromDate.getTime() + duration * 1000);

@@ -9,7 +9,7 @@ interface CloudinaryDeleteResponse {
 export default async function deleteImage(
   publicId: string
 ): Promise<{ success: boolean; message: string }> {
-  const cloudName = "dmgzksj3l";
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME as string;
   const apiKey = process.env.CLOUDINARY_API_KEY as string;
   const apiSecret = process.env.CLOUDINARY_API_SECRET as string;
   const timestamp = Math.floor(Date.now() / 1000);

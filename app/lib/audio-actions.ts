@@ -1,14 +1,14 @@
 "use server";
 
-import connectMongo from "@/utils/connect-mongo";
 import { z } from "zod";
 import Track, { ITrack } from "../models/track";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import uploadImage from "@/utils/upload-image";
-import uploadAudio from "@/utils/upload-audio";
-import deleteImage from "@/utils/delete-image";
-import deleteAudio from "@/utils/delete-audio";
+import uploadImage from "../utils/upload-image";
+import uploadAudio from "../utils/upload-audio";
+import connectMongo from "../utils/connect-mongo";
+import deleteAudio from "../utils/delete-audio";
+import deleteImage from "../utils/delete-image";
 
 const TrackSchema = z.object({
   id: z.string(),
@@ -26,6 +26,7 @@ const TrackSchema = z.object({
     .refine((file: File) => {
       return !file || file.size <= 1024 * 1024 * 5;
     }, "File size must be less than 3MB"),
+  duration: z.number().min(1),
 });
 
 export type TrackState = {
@@ -43,6 +44,7 @@ export async function createTrack(prevState: TrackState, formData: FormData) {
     artistName: formData.get("artistName"),
     trackName: formData.get("trackName"),
     audio: formData.get("audio"),
+    duration: Number(formData.get("duration")),
   });
 
   const trackStarts = formData.get("trackStarts");
@@ -61,7 +63,7 @@ export async function createTrack(prevState: TrackState, formData: FormData) {
   }
 
   try {
-    const { artistName, trackName, audio } = validatedFields.data;
+    const { artistName, trackName, audio, duration } = validatedFields.data;
 
     let uploadResult: { url: string; publicId: string } | null = null;
     if (image && image instanceof File) {
@@ -87,6 +89,7 @@ export async function createTrack(prevState: TrackState, formData: FormData) {
         imagePublicId: uploadResult ? uploadResult.publicId : null,
         trackStarts: trackStarts ? trackStarts : null,
         trackEnds: trackEnds ? trackEnds : null,
+        duration,
       });
 
       console.log("Track created successfully.");
@@ -104,6 +107,7 @@ export async function createTrack(prevState: TrackState, formData: FormData) {
 }
 
 export async function deleteTrack(id: string, path: string, publicId?: string) {
+  await connectMongo();
   await Track.findByIdAndDelete(id);
   await deleteAudio(path);
   if (publicId) {
@@ -117,6 +121,7 @@ const UpdateTrackSchema = TrackSchema.omit({
   id: true,
   image: true,
   audio: true,
+  duration: true,
 });
 
 export async function updateTrack(
@@ -133,6 +138,7 @@ export async function updateTrack(
   const trackEnds = formData.get("trackEnds");
   const image = formData.get("image");
   const audio = formData.get("audio");
+  const duration = Number(formData.get("duration") || 0);
 
   if (!validatedFields.success) {
     console.error(
@@ -150,8 +156,8 @@ export async function updateTrack(
 
     let uploadResult: { url: string; publicId: string } | null = null;
     if (image instanceof File && image.size > 0) {
-      console.log('Deleting image');
-      await deleteImage(track.imagePublicId ?? '');
+      console.log("Deleting image");
+      await deleteImage(track.imagePublicId ?? "");
       console.log("Uploading image...");
       uploadResult = await uploadImage(image);
       console.log("Image uploaded:", uploadResult);
@@ -178,9 +184,12 @@ export async function updateTrack(
           trackName,
           filePath: filePath ? filePath : track.filePath,
           imageURL: uploadResult ? uploadResult.url : track.imageURL,
-          imagePublicId: uploadResult ? uploadResult.publicId : track.imagePublicId,
+          imagePublicId: uploadResult
+            ? uploadResult.publicId
+            : track.imagePublicId,
           trackStarts: trackStarts ? trackStarts : null,
           trackEnds: trackEnds ? trackEnds : null,
+          duration: duration !== 0 ? duration : track.duration,
         },
       },
       { new: true }

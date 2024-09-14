@@ -1,0 +1,26 @@
+/* styles.css */
+.quill-editor-container {
+  background-color: black;
+  padding: 1rem;
+}
+
+.quill-editor-container .ql-container {
+  background-color: black;
+  color: white;
+  min-height: 300px; /* Ensures the editor has some initial height */
+}
+
+.quill-editor-container .ql-toolbar {
+  background-color: #333;
+  border: none;
+}
+
+.quill-editor-container .ql-container.ql-snow {
+  border: 1px solid black;
+}
+
+.quill-editor-container .ql-editor {
+  background-color: black;
+  color: white;
+  border: 1px solid black;
+}

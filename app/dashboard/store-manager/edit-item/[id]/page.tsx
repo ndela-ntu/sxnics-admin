@@ -1,6 +1,7 @@
 import ShopItem, { IShopItem } from "@/app/models/shop-item";
 import EditItemForm from "@/app/ui/store-manager/edit-item-form";
-import connectMongo from "@/utils/connect-mongo";
+import connectMongo from "@/app/utils/connect-mongo";
+
 import { notFound } from "next/navigation";
 
 export default async function Page({ params }: { params: { id: string } }) {
